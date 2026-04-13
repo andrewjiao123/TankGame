@@ -1,13 +1,18 @@
 // 1 April 2026 | TankGame by Andrew Jiao
 Tank t1;
 Obstacle o1;
+Obstacle o2;
+Obstacle o3;
 PImage bg;
+PImage obs;
 
 void setup() {
   size(500, 500);
   bg = loadImage("background.png");
   t1 = new Tank();
-  o1 = new Obstacle(400,100,100,50,5,100);
+  o1 = new Obstacle(400,100,100,50,10,100);
+  o2 = new Obstacle(300,100,200,50,10,100);
+  o3 = new Obstacle(200,100,300,50,10,100);
 }
 
 void draw() {
@@ -16,6 +21,11 @@ void draw() {
   image(bg,0,0);
   t1.display();
   o1.display();
+  o2.display();
+  o3.display();
+  o1.move();
+  o2.move();
+  o3.move();
 }
 
 void keyPressed() {
