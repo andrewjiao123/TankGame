@@ -22,6 +22,9 @@ class Obstacle {
   
   void move() {
     x=x+speed;
+    if(x>width) {
+      x = 0;
+    }
   }
   
   void fire() {}
