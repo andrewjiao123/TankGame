@@ -1,9 +1,9 @@
 class Projectile {
-  float x,y,w,h,speed;
+  float x, y, w, h, speed;
   float vx, vy;
   char dir;
-  
- Projectile(float x, float y, float vx, float vy) {
+
+  Projectile(float x, float y, float vx, float vy) {
     this.x = x;
     this.y = y;
     this.vx = vx;
@@ -13,16 +13,23 @@ class Projectile {
     speed = 8;
     dir = 'u';
   }
-  
+
   void display() {
-    fill(255,0,0);
-    rect(x,y,w,h);
+    fill(255, 0, 0);
+    rect(x, y, w, h);
   }
-  
+
   void move() {
     x += vx;
     y +=vy;
   }
-  
-  void fire() {}
+
+  boolean intersect(Obstacle o) {
+    float distance = dist(x, y, o.x, o.y);
+    if (distance < 30) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

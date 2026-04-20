@@ -35,9 +35,17 @@ void draw() {
     o.display();
     o.move();
   }
-  
+  //render and detect collision
   for (int i = 0; i < projectiles.size(); i++) {
     Projectile p = projectiles.get(i);
+    for(int j = 0; j < obstacles.size(); j++) {
+      Obstacle o = obstacles.get(j);
+      if(p.intersect(o)) {
+        score = score + 100;
+        projectiles.remove(i);
+        obstacles.remove(j);
+      }
+    }
     p.display();
     p.move();
   }
