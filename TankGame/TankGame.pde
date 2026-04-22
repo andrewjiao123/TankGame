@@ -21,36 +21,52 @@ void setup() {
 void draw() {
   background(127);
   imageMode(CORNER);
-  image(bg, 0, 0);
-  
-  //distribute object on timer
-  if(objTimer.isFinished()) {
-    // Add object
-    obstacles.add(new Obstacle(-100,200,100,100,int(random(1,10)),10));
-    //Restart Timer
-    objTimer.start();
+  image(bg, 0, 0); //
+  if (objTimer.isFinished()) {
+    float randomY = random(50, height - 100);
+    obstacles.add(new Obstacle(-100, randomY, 100, 100, int(random(1, 10)), 10));
+    objTimer.start(); 
   }
-  for (int i = 0; i < obstacles.size(); i++) {
-    Obstacle o = obstacles.get(i);
-    o.display();
+  for (int j = obstacles.size() - 1; j >= 0; j--) {
+    Obstacle o = obstacles.get(j);
+    o.display(); // [cite: 6]
     o.move();
+    if (o.reachedSide()) {
+      obstacles.remove(j);
+      continue;
+    }
+    if (t1.intersect(o)) { 
+      score = 0; 
+      obstacles.remove(j); 
+      continue;
+    }
   }
-  //render and detect collision
-  for (int i = 0; i < projectiles.size(); i++) {
+  for (int i = projectiles.size() - 1; i >= 0; i--) {
     Projectile p = projectiles.get(i);
-    for(int j = 0; j < obstacles.size(); j++) {
+    p.display(); // [cite: 9]
+    p.move();
+    if (p.reachedEdge()) {
+      projectiles.remove(i);
+      continue;
+    }
+    boolean hit = false;
+    for (int j = obstacles.size() - 1; j >= 0; j--) {
       Obstacle o = obstacles.get(j);
-      if(p.intersect(o)) {
-        score = score + 100;
-        projectiles.remove(i);
-        obstacles.remove(j);
+
+      if (p.intersect(o)) { //
+        score = score + 100; //
+        obstacles.remove(j); //
+        hit = true;
+        break;
       }
     }
-    p.display();
-    p.move();
+    if (hit) {
+      projectiles.remove(i); //
+    }
   }
-  t1.display();
-  scorePanel();
+
+  t1.display(); // [cite: 9]
+  scorePanel(); // [cite: 9]
 }
 
 void keyPressed() {
@@ -72,9 +88,9 @@ void mousePressed() {
   if (mag > 0) {
     dx /= mag;
     dy /= mag;
-    
+
     float speed = 5;
-    projectiles.add(new Projectile(t1.x,t1.y, dx * speed, dy * speed));
+    projectiles.add(new Projectile(t1.x, t1.y, dx * speed, dy * speed));
   }
 }
 

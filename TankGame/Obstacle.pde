@@ -1,31 +1,37 @@
 class Obstacle {
-  float x,y,w,h,speed,health;
+  float x, y, w, h, speed, health;
   PImage obs;
   char idir;
-  
- Obstacle(float x, float y, float w, float h, float speed, float health) {
+
+  Obstacle(float x, float y, float w, float h, float speed, float health) {
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
     this.speed = speed;
     this.health = health;
+
     idir = 'w';
     obs = loadImage("obstacle.png");
   }
-  
+
   void display() {
     fill(128);
     imageMode(CENTER);
-    image(obs,x,y);
+    image(obs, x, y);
   }
-  
+
   void move() {
     x=x+speed;
-    if(x>width) {
+    if (x>width) {
       x = 0;
     }
   }
-  
-  void fire() {}
+
+  void fire() {
+  }
+  boolean reachedSide() {
+    // Returns true if the obstacle touches the edges of the screen
+    return (x < -200 || x >= width + 200 || y < -200 || y >= height+200);
+  }
 }

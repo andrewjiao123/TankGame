@@ -1,9 +1,9 @@
 class Tank {
-  float x,y,w,h,speed,health;
-  PImage iTankW,iTankA,iTankS,iTankD;
+  float x, y, w, h, speed, health;
+  PImage iTankW, iTankA, iTankS, iTankD;
   char idir;
-  
- Tank() {
+
+  Tank() {
     x = 100.0;
     y = 100.0;
     w = 100.0;
@@ -16,24 +16,23 @@ class Tank {
     iTankD = loadImage("tank_d.png");
     idir = 'w';
   }
-  
+
   void display() {
     imageMode(CENTER);
-    if(idir == 'w') {
-      image(iTankW,x,y);
+    if (idir == 'w') {
+      image(iTankW, x, y);
     } else if (idir == 'a') {
-      image(iTankA,x,y);
+      image(iTankA, x, y);
     } else if (idir == 's') {
-      image(iTankS,x,y);
+      image(iTankS, x, y);
     } else if (idir == 'd') {
-      image(iTankD,x,y);
+      image(iTankD, x, y);
     }
-
   }
-  
+
   void move(char dir) {
     idir = dir;
-    if(dir == 'w') {
+    if (dir == 'w') {
       y = y - speed;
     } else if (dir == 's') {
       y = y + speed;
@@ -43,6 +42,11 @@ class Tank {
       x = x + speed;
     }
   }
-  
-  void fire() {}
+
+  void fire() {
+  }
+  boolean intersect(Obstacle o) {
+    float distance = dist(x, y, o.x, o.y);
+    return distance < 50;
+  }
 }
