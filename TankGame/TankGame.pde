@@ -1,10 +1,12 @@
-// 1 April 2026 | TankGame by Andrew Jiao
+// 1 April 2026 | TankGame | Andrew Jiao
 Tank t1;
 ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 ArrayList<PowerUp> powerups = new ArrayList<PowerUp>();
 PImage bg;
 int score, health;
+int ammo = 20; 
+int gameState = 0; 
 Timer objTimer, puTimer;
 
 void setup() {
@@ -13,59 +15,76 @@ void setup() {
   health = 10;
   bg = loadImage("background.png");
   t1 = new Tank();
-  objTimer = new Timer(1000);
+  objTimer = new Timer(1000); 
   objTimer.start();
-  puTimer = new Timer(5000);
+  
+
+  puTimer = new Timer(2000); 
   puTimer.start();
 }
 
 void draw() {
-  // GAME OVER CHECK
-  if (health <= 0) {
-    background(0);
-    fill(255, 0, 0);
-    textAlign(CENTER, CENTER);
-    textSize(50);
-    text("GAME OVER", width/2, height/2);
-    noLoop();
-    return;
+  if (gameState == 0) {
+    displayStartScreen();
+  } else if (gameState == 1) {
+    playGame();
+  } else if (gameState == 2) {
+    displayGameOver();
   }
+}
 
+void displayStartScreen() {
+  background(0);
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(40);
+  text("TANK GAME", width/2, height/2 - 30);
+  textSize(20);
+  text("Click Mouse to Begin", width/2, height/2 + 30); 
+}
+
+void displayGameOver() {
+  background(0);
+  fill(255, 0, 0); 
+  textAlign(CENTER, CENTER);
+  textSize(50);
+  text("GAME OVER", width/2, height/2); 
+  noLoop();
+}
+
+void playGame() {
   background(127);
   imageMode(CORNER);
-  image(bg, 0, 0);
+  if (bg != null) image(bg, 0, 0);
 
   // SPAWNING
   if (objTimer.isFinished()) {
     float randomY = random(50, height - 100);
-    // Obstacle constructor: x, y, w, h, speed, health [cite: 2]
-    obstacles.add(new Obstacle(-100, randomY, 100, 100, int(random(1, 10)), 10));
+    obstacles.add(new Obstacle(-100, randomY, 100, 100, int(random(1, 10)), 10)); 
     objTimer.start();
   }
   
   if (puTimer.isFinished()) {
-    // PowerUp constructor now requires idir [cite: 9]
-    powerups.add(new PowerUp(50, 50, 'd')); 
+    powerups.add(new PowerUp(50, 50, 'd'));  
     puTimer.start();
   }
 
   // POWERUP LOGIC
   for (int i = powerups.size() - 1; i >= 0; i--) {
     PowerUp pu = powerups.get(i);
-    pu.display();
-    pu.move();
+    pu.display(); 
+    pu.move(); 
 
-    // Collision detection using distance [cite: 44]
     if (dist(t1.x, t1.y, pu.x, pu.y) < 60) {
       if (pu.type == 'h') {
-        health = min(health + 2, 10); // Heal 2
+        health = min(health + 2, 10); 
       } else if (pu.type == 'a') {
-        score += 500; // Ammo bonus
+        ammo += 50; 
       } else if (pu.type == 't') {
-        t1.speed += 5; // Turret/Speed boost
+        spawnTurretWave(); 
       }
       powerups.remove(i);
-    } else if (pu.reachedSide()) {
+    } else if (pu.reachedSide()) { // [cite: 20]
       powerups.remove(i);
     }
   }
@@ -74,33 +93,34 @@ void draw() {
   for (int j = obstacles.size() - 1; j >= 0; j--) {
     Obstacle o = obstacles.get(j);
     o.display(); 
-    o.move();
+    o.move(); 
     
-    if (o.reachedSide()) {
+    if (o.reachedSide()) { 
       obstacles.remove(j);
       continue;
     }
     
-    if (t1.intersect(o)) { // [cite: 44]
-      health -= 1;
+    if (t1.intersect(o)) { 
+      health -= 1; 
       obstacles.remove(j);
+      if (health <= 0) gameState = 2;
     }
   }
 
   // PROJECTILE LOGIC
   for (int i = projectiles.size() - 1; i >= 0; i--) {
     Projectile p = projectiles.get(i);
-    p.display();
-    p.move();
+    p.display(); // [cite: 25]
+    p.move(); // [cite: 26]
     
-    if (p.reachedEdge()) {
+    if (p.reachedEdge()) { // [cite: 30]
       projectiles.remove(i);
       continue;
     }
 
     for (int j = obstacles.size() - 1; j >= 0; j--) {
       Obstacle o = obstacles.get(j);
-      if (p.intersect(o)) { // [cite: 27]
+      if (p.intersect(o)) { 
         score += 100;
         obstacles.remove(j);
         projectiles.remove(i);
@@ -111,23 +131,37 @@ void draw() {
 
   t1.display(); 
   scorePanel();
-} // THIS BRACE CLOSES DRAW() - Without this, you get errors below!
+}
+
+// --- MECHANICS ---
+
+void spawnTurretWave() {
+  int bullets = 16; 
+  for (int i = 0; i < bullets; i++) {
+    float angle = TWO_PI / bullets * i;
+    float vx = cos(angle) * 7;
+    float vy = sin(angle) * 7;
+    projectiles.add(new Projectile(t1.x, t1.y, vx, vy)); 
+  }
+}
 
 void keyPressed() {
-  if (key == 'w') t1.move('w');
-  else if (key == 's') t1.move('s');
-  else if (key == 'a') t1.move('a');
-  else if (key == 'd') t1.move('d');
+  if (gameState == 1) {
+    t1.move(key); 
+  }
 }
 
 void mousePressed() {
-  float dx = mouseX - t1.x;
-  float dy = mouseY - t1.y;
-  float mag = sqrt(dx*dx + dy*dy);
-  if (mag > 0) {
-    dx /= mag;
-    dy /= mag;
-    projectiles.add(new Projectile(t1.x, t1.y, dx * 8, dy * 8)); // [cite: 22]
+  if (gameState == 0) {
+    gameState = 1; 
+  } else if (gameState == 1 && ammo > 0) { 
+    float dx = mouseX - t1.x;
+    float dy = mouseY - t1.y;
+    float mag = sqrt(dx*dx + dy*dy);
+    if (mag > 0) {
+      projectiles.add(new Projectile(t1.x, t1.y, (dx/mag)*8, (dy/mag)*8)); 
+      ammo--; 
+    }
   }
 }
 
@@ -135,10 +169,13 @@ void scorePanel() {
   fill(127, 200);
   rectMode(CENTER);
   noStroke();
-  rect(width/2, 15, width, 30);
+  rect(width/2, 20, width, 40);
+  
   fill(255);
-  textSize(20);
-  textAlign(CENTER);
-  text("Score: " + score, width/4, 25);
-  text("Health: " + health, 3 * width/4, 25);
+  textSize(16);
+  textAlign(CENTER, CENTER);
+  // Displays Score, Ammo, and Health at the top
+  text("Score: " + score, width * 0.2, 20);
+  text("Ammo: " + ammo, width * 0.5, 20); 
+  text("Health: " + health, width * 0.8, 20);
 }
