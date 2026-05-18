@@ -17,7 +17,6 @@ void setup() {
   t1 = new Tank();
   objTimer = new Timer(1000); 
   objTimer.start();
-  
 
   puTimer = new Timer(2000); 
   puTimer.start();
@@ -41,15 +40,6 @@ void displayStartScreen() {
   text("TANK GAME", width/2, height/2 - 30);
   textSize(20);
   text("Click Mouse to Begin", width/2, height/2 + 30); 
-}
-
-void displayGameOver() {
-  background(0);
-  fill(255, 0, 0); 
-  textAlign(CENTER, CENTER);
-  textSize(50);
-  text("GAME OVER", width/2, height/2); 
-  noLoop();
 }
 
 void playGame() {
@@ -84,7 +74,7 @@ void playGame() {
         spawnTurretWave(); 
       }
       powerups.remove(i);
-    } else if (pu.reachedSide()) { // [cite: 20]
+    } else if (pu.reachedSide()) { 
       powerups.remove(i);
     }
   }
@@ -110,10 +100,10 @@ void playGame() {
   // PROJECTILE LOGIC
   for (int i = projectiles.size() - 1; i >= 0; i--) {
     Projectile p = projectiles.get(i);
-    p.display(); // [cite: 25]
-    p.move(); // [cite: 26]
+    p.display(); 
+    p.move(); 
     
-    if (p.reachedEdge()) { // [cite: 30]
+    if (p.reachedEdge()) { 
       projectiles.remove(i);
       continue;
     }
@@ -133,7 +123,54 @@ void playGame() {
   scorePanel();
 }
 
-// --- MECHANICS ---
+// --- NEW/UPDATED MECHANICS & UI ---
+
+void displayGameOver() {
+  // Semi-transparent dark overlay
+  fill(0, 180);
+  rectMode(CORNER);
+  rect(0, 0, width, height);
+
+  textAlign(CENTER, CENTER);
+  
+  // Retro Glow "GAME OVER"
+  textSize(50);
+  fill(255, 0, 0, 100); // Outer glow
+  text("GAME OVER", width/2 + 2, height/2 - 48); 
+  fill(255, 50, 50);     // Main text color
+  text("GAME OVER", width/2, height/2 - 50);
+
+  // Final Score Display
+  textSize(22);
+  fill(255);
+  text("FINAL SCORE: " + score, width/2, height/2 + 10);
+
+  // Flashing Restart Prompt
+  if (frameCount % 60 < 30) {
+    fill(200);
+    textSize(16);
+    text("CLICK TO RESTART", width/2, height/2 + 60);
+  }
+}
+
+void resetGame() {
+  // Reset all variables to starting values
+  score = 0;
+  health = 10;
+  ammo = 20;
+  
+  // Clear all active objects in lists
+  projectiles.clear();
+  obstacles.clear();
+  powerups.clear();
+  
+  // Re-initialize Tank and Game State
+  t1 = new Tank(); 
+  gameState = 1;
+  
+  // Ensure the loop is running (in case noLoop was called)
+  loop(); 
+}
 
 void spawnTurretWave() {
   int bullets = 16; 
@@ -154,7 +191,8 @@ void keyPressed() {
 void mousePressed() {
   if (gameState == 0) {
     gameState = 1; 
-  } else if (gameState == 1 && ammo > 0) { 
+  } 
+  else if (gameState == 1 && ammo > 0) { 
     float dx = mouseX - t1.x;
     float dy = mouseY - t1.y;
     float mag = sqrt(dx*dx + dy*dy);
@@ -162,11 +200,14 @@ void mousePressed() {
       projectiles.add(new Projectile(t1.x, t1.y, (dx/mag)*8, (dy/mag)*8)); 
       ammo--; 
     }
+  } 
+  else if (gameState == 2) {
+    resetGame();
   }
 }
 
 void scorePanel() {
-  fill(127, 200);
+  fill(0, 150);
   rectMode(CENTER);
   noStroke();
   rect(width/2, 20, width, 40);
@@ -174,7 +215,6 @@ void scorePanel() {
   fill(255);
   textSize(16);
   textAlign(CENTER, CENTER);
-  // Displays Score, Ammo, and Health at the top
   text("Score: " + score, width * 0.2, 20);
   text("Ammo: " + ammo, width * 0.5, 20); 
   text("Health: " + health, width * 0.8, 20);
